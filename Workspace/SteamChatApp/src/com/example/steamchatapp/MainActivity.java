@@ -16,7 +16,7 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	
-	public static final String API_KEY = "Insert API Key Here";
+	public static final String API_KEY = "";
 	public static final String DOMAIN = "bobjrsenior.pw";
 	
 	public EditText username;
@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
 					params.addParam("steamid", "76561198031483209");
 					params.addParam("relatinoship", "friend");
 					*/
-					new GetDataWithParams(password, 1, username.getText().toString()).execute(params);
+					new LoginAsyncTask(password, 1, username.getText().toString()).execute(params);
 					
 				}
 				else{
@@ -64,6 +64,12 @@ public class MainActivity extends Activity {
     	}
 
     }
+
+	@Override
+	public void onBackPressed() {
+		finish();
+		super.onBackPressed();
+	}
 }
 
 

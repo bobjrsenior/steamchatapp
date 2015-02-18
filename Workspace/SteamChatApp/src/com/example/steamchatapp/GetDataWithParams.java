@@ -104,8 +104,13 @@ public class GetDataWithParams extends AsyncTask<RequestParams, Void, String>{
 				//Set the cipher to encrypt using the public key
 				cipher.init(Cipher.ENCRYPT_MODE, pub);
 				
+				Log.d("Encryption_Check", bytepass.toString());
 				//Encode the password
 				byte[] pass_encrypted = cipher.doFinal((bytepass));
+				Log.d("Encryption_Check", pass_encrypted.toString());
+				
+				cipher.init(Cipher.ENCRYPT_MODE, pub);
+				
 				//encode it into base 64 url safe bytes
 				pass_encrypted = Base64.encode(pass_encrypted, Base64.URL_SAFE);
 				//Turn it into a string
@@ -116,6 +121,7 @@ public class GetDataWithParams extends AsyncTask<RequestParams, Void, String>{
 				RequestParams params = new RequestParams("POST", "https://steamcommunity.com/login/dologin/");
 				params.addParam("password", pass_encrypted_string);
 				params.addParam("username", username);
+				params.addParam("rsatimestamp", (String) obj.getString("timestamp"));
 				new GetDataWithParams(passView, 2, username).execute(params);
 				
 			} catch (JSONException e) {
