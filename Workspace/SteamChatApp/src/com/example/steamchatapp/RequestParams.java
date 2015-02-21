@@ -3,10 +3,11 @@ package com.example.steamchatapp;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import android.util.Log;
 
@@ -51,10 +52,10 @@ public class RequestParams {
 		return this.baseUrl + "?" + getEncodedParams();
 	}
 
-	public HttpURLConnection setupConnection() throws IOException {
+	public HttpsURLConnection setupConnection() throws IOException {
 		if (method.equals("GET")) {
 			URL url = new URL(getEncodedUrl());
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 			con.setRequestMethod("GET");
 			
 			return con;
@@ -62,7 +63,7 @@ public class RequestParams {
 		} else {// POST
 
 			URL url = new URL(this.baseUrl);
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 			con.setRequestMethod("POST");
 			con.setDoOutput(true);
 			OutputStreamWriter writer = new OutputStreamWriter(

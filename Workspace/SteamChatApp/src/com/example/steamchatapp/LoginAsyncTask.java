@@ -11,48 +11,55 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.ArrayList;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.http.util.EncodingUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.EditText;
 
-public class LoginAsyncTask extends AsyncTask<RequestParams, String[], String>{
+public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>>{
 
 	
-	EditText passView;
-	String username;
-	int what;
+	Login activity;
 	
-	public LoginAsyncTask(EditText pass, int what, String username){
-		passView = pass;
-		this.what = what;
+	String password;
+	String username;
+	
+	Bitmap captcha_image;
+	String captcha_answer;
+	String steamguard_answer;
+	
+	
+	public LoginAsyncTask(String pass, String username, Login activity){
+		this.password = pass;
 		this.username = username;
+		this.activity = activity;
 	}
 	
 
 	@Override
-	protected String doInBackground(RequestParams... params) {
-		//Get the RSA modulus and Exponent from steam
-		String result = GetData(params[0]);
-		
+	protected ArrayList<String> doInBackground(String... params) {
 		//Handle Captcha and steam guard
-		
+		ArrayList<String> results = new ArrayList<String>();
 		JSONObject obj;
 		//byte[] password = (byte[]) ((Integer) (Integer.parseInt((passView.getText().toString())))).to;
-		byte[] bytepass = EncodingUtils.getAsciiBytes((String) (passView.getText().toString()));
+		byte[] bytepass = EncodingUtils.getAsciiBytes((String) (password));
 		
 		try {
-			obj = new JSONObject(result);
+			obj = new JSONObject(params[0]);
 			//Get the RSA modulus and exponent from the returned JSON Object
 			String auth_mod = ((String) obj.getString("publickey_mod"));
 			String auth_exp = (String) obj.getString("publickey_exp");
@@ -76,26 +83,69 @@ public class LoginAsyncTask extends AsyncTask<RequestParams, String[], String>{
 			byte[] pass_encrypted = cipher.doFinal((bytepass));
 						
 			//encode it into base 64 url safe bytes
+			//pass_encrypted = ;
 			pass_encrypted = Base64.encode(pass_encrypted, Base64.URL_SAFE);
+			//StringBuilder b;
 			//Turn it into a string
 			String pass_encrypted_string = new String(pass_encrypted);
 			
 			Log.d("Demo2", pass_encrypted_string.toString());
 			//Pass the params to the login url
-			RequestParams params2 = new RequestParams("POST", "https://steamcommunity.com/login/dologin/");
+			RequestParams params2 = new RequestParams("POST", "https://steamcommunity.com/mobilelogin/dologin/");
 			params2.addParam("password", pass_encrypted_string);
 			params2.addParam("username", username);
 			params2.addParam("rsatimestamp", (String) obj.getString("timestamp"));
-			result = GetData(params2);
-			
-			obj = new JSONObject(result);
-			if(obj.getString("success").equals("false")){
-				if(obj.getString("captcha_needed").equals("true")){
-					String captcha_gid = obj.getString("captcha_gid");
-					
+			if(params.length > 1){
+				if(params[1].equals("1")){
+					params2.addParam("captcha_gid", params[2]);
+					params2.addParam("captcha_text", params[3]);
+					Log.d("captcha Stuff", "G: " + params[2] + " : " + params[3]);
+				}
+				else if(params[1].equals("2")){
+					params2.addParam("emailauth", params[2]);
+					params2.addParam("emailsteamid", params[3]);
+				}
+				else if(params[1].equals("3")){
+					params2.addParam("captcha_gid", params[2]);
+					params2.addParam("captcha_text", params[3]);
+					params2.addParam("emailauth", params[4]);
+					params2.addParam("emailsteamid", params[5]);
 				}
 			}
 			
+			
+			String result = GetData(params2);
+			
+			obj = new JSONObject(result);
+			
+			//boolean[] check = new boolean[2];
+			
+			if(obj.getString("success").equals("false")){
+				results.add("0");
+				if(obj.getString("captcha_needed").equals("true")){
+					String captcha_gid = obj.getString("captcha_gid");
+					//params2 = new RequestParams("GET", "https://steamcommunity.com/public/captcha.php?gid=" + captcha_gid);
+					//captcha_image = GetBitMap(params2);
+					//check[0] = true;
+					results.add(captcha_gid);
+					
+				}
+				else{
+					results.add("1");
+				}
+				
+				if(obj.getString("requires_twofactor").equals("true")){
+					//check[1] = true;
+					results.add("0");
+				}
+				else{
+					results.add("1");
+				}
+			}
+			else{
+				results.add("1");
+			}
+			return results;
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -119,9 +169,18 @@ public class LoginAsyncTask extends AsyncTask<RequestParams, String[], String>{
 			e.printStackTrace();
 		}
 		
-		
-		
 		return null;
+	}
+	
+	@Override
+	protected void onProgressUpdate(Boolean... values) {
+		super.onProgressUpdate(values);
+		
+		if(values[0]){
+			
+		}
+		
+		
 	}
 	
 	
@@ -130,7 +189,7 @@ public class LoginAsyncTask extends AsyncTask<RequestParams, String[], String>{
 		BufferedReader reader = null;
 		String result = null;
 		try {
-			HttpURLConnection con = params.setupConnection();
+			HttpsURLConnection con = params.setupConnection();
 			
 			reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			StringBuilder sb = new StringBuilder();
@@ -157,24 +216,9 @@ public class LoginAsyncTask extends AsyncTask<RequestParams, String[], String>{
 		
 		return result;
 	}
-	
 
 	@Override
-	protected void onProgressUpdate(String[]... values) {
-		// TODO Auto-generated method stub
-		super.onProgressUpdate(values);
-	}
-
-
-	@Override
-	protected void onPostExecute(String result) {
-		if(what == 1){
-			
-
-		
-		}
-		else if (what == 2){
-			
-		}
+	protected void onPostExecute(ArrayList<String> result) {
+		activity.StatusCheck(result);
 	}
 }
