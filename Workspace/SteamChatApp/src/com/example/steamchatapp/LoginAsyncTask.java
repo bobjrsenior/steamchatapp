@@ -95,6 +95,7 @@ public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>
 			params2.addParam("password", pass_encrypted_string);
 			params2.addParam("username", username);
 			params2.addParam("rsatimestamp", (String) obj.getString("timestamp"));
+			params2.addParam("token_gid", obj.getString("token_gid"));
 			if(params.length > 1){
 				if(params[1].equals("1")){
 					params2.addParam("captcha_gid", params[2]);

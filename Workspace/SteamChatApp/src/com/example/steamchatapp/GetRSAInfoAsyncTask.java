@@ -31,7 +31,7 @@ public class GetRSAInfoAsyncTask extends AsyncTask<RequestParams, Void, String>{
 			String line = "";
 			while((line = reader.readLine()) != null){
 				//Output what is recieved for debugging
-				//Log.d("demo", "aa " + line);
+				Log.d("demo", "aa " + line);
 				sb.append(line);
 			}
 			result = sb.toString();

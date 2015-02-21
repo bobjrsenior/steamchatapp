@@ -27,6 +27,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -115,33 +116,42 @@ public class MainActivity extends Activity implements Login{
 			//Captcha
 			if(results.get(1).length() > 2){
 				Log.d("resulting", "Got there");
-				
-				ImageView captcha_image = new ImageView(MainActivity.this);
-				captcha_image.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				captcha_image.setId(27015);
-				layout.addView(captcha_image);
+				if(findViewById(27015) == null){
+					ImageView captcha_image = new ImageView(MainActivity.this);
+					captcha_image.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 135));
+					captcha_image.setId(27015);
+					captcha_image.setScaleType(ScaleType.FIT_XY);
+					layout.addView(captcha_image);
+				}
 				captcha_id = results.get(1);
 				RequestParams params = new RequestParams("GET", "https://steamcommunity.com/public/captcha.php?gid=" + results.get(1));
 				new GetImage().execute(params);
 				
-				EditText answer = new EditText(MainActivity.this);
-				answer.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				answer.setHint("Captcha");
-				layout.addView(answer);
-				answer.setId(27016);
-				
-				Button retry = new Button(MainActivity.this);
-				retry.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				retry.setText("Check Captcha");
-				layout.addView(retry);
-				
-				retry.setOnClickListener(new OnClickListener() {
+				if(findViewById(27016) == null){
+					EditText answer = new EditText(MainActivity.this);
+					answer.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+					answer.setHint("Captcha");
+					layout.addView(answer);
+					answer.setId(27016);
+					Button retry = new Button(MainActivity.this);
+					retry.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+					retry.setText("Check Captcha");
+					layout.addView(retry);
 					
-					@Override
-					public void onClick(View v) {
-						new LoginAsyncTask(password.getText().toString(), username.getText().toString(), MainActivity.this).execute(loginSettings, "1", captcha_id, ((EditText) findViewById(27016)).getText().toString());
-					}
-				});
+					retry.setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							new LoginAsyncTask(password.getText().toString(), username.getText().toString(), MainActivity.this).execute(loginSettings, "1", captcha_id, ((EditText) findViewById(27016)).getText().toString());
+							progressDialog.show();
+						}
+					});
+				}
+				else{
+					EditText answer = (EditText) findViewById(27016);
+					answer.setText("");
+				}
+
 
 			}
 		}
