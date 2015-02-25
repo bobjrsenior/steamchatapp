@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -19,6 +18,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.http.util.EncodingUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +27,6 @@ import org.json.JSONObject;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.Base64;
 import android.util.Log;
 import android.widget.EditText;
 
@@ -56,7 +56,7 @@ public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>
 		ArrayList<String> results = new ArrayList<String>();
 		JSONObject obj;
 		//byte[] password = (byte[]) ((Integer) (Integer.parseInt((passView.getText().toString())))).to;
-		byte[] bytepass = EncodingUtils.getAsciiBytes((String) (password));
+		byte[] bytepass = StringUtils.getBytesUtf8(password);//EncodingUtils.getAsciiBytes((String) (password));
 		
 		try {
 			obj = new JSONObject(params[0]);
@@ -84,30 +84,34 @@ public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>
 						
 			//encode it into base 64 url safe bytes
 			//pass_encrypted = ;
-			pass_encrypted = Base64.encode(pass_encrypted, Base64.URL_SAFE);
+			pass_encrypted = Base64.encodeBase64(pass_encrypted);
 			//StringBuilder b;
 			//Turn it into a string
-			String pass_encrypted_string = new String(pass_encrypted);
+			String pass_encrypted_string = StringUtils.newStringUtf8(pass_encrypted);//new String(pass_encrypted);
 			
 			Log.d("Demo2", pass_encrypted_string.toString());
 			//Pass the params to the login url
-			RequestParams params2 = new RequestParams("POST", "https://steamcommunity.com/mobilelogin/dologin/");
+			RequestParams params2 = new RequestParams("POST", "https://steamcommunity.com/login/dologin/");
 			params2.addParam("password", pass_encrypted_string);
 			params2.addParam("username", username);
 			params2.addParam("rsatimestamp", (String) obj.getString("timestamp"));
 			params2.addParam("token_gid", obj.getString("token_gid"));
 			if(params.length > 1){
 				if(params[1].equals("1")){
-					params2.addParam("captcha_gid", params[2]);
+					params2.addParam("captchagid", params[2]);
 					params2.addParam("captcha_text", params[3]);
+					params2.addParam("emailauth", "");
+					params2.addParam("emailsteamid", "");
 					Log.d("captcha Stuff", "G: " + params[2] + " : " + params[3]);
 				}
 				else if(params[1].equals("2")){
 					params2.addParam("emailauth", params[2]);
 					params2.addParam("emailsteamid", params[3]);
+					params2.addParam("captchagid", "");
+					params2.addParam("captcha_text", "");
 				}
 				else if(params[1].equals("3")){
-					params2.addParam("captcha_gid", params[2]);
+					params2.addParam("captchagid", params[2]);
 					params2.addParam("captcha_text", params[3]);
 					params2.addParam("emailauth", params[4]);
 					params2.addParam("emailsteamid", params[5]);
