@@ -20,15 +20,12 @@ import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
-import org.apache.http.util.EncodingUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.EditText;
 
 
 public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>>{

@@ -1,14 +1,9 @@
 package com.example.steamchatapp;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.ActionBar.LayoutParams;
 import android.app.Activity;
@@ -20,8 +15,6 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -88,7 +81,7 @@ public class MainActivity extends Activity implements Login{
     
     protected boolean isConnectedOnline() {
     	// TODO Auto-generated method stub
-    	ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
+    	ConnectivityManager cm = (ConnectivityManager) getSystemService(MainActivity.CONNECTIVITY_SERVICE);
     	NetworkInfo networkInfo = cm.getActiveNetworkInfo();
     	if(networkInfo != null && networkInfo.isConnected()){
     		return true;
@@ -204,9 +197,7 @@ public class MainActivity extends Activity implements Login{
 	public class GetImage extends AsyncTask<RequestParams, Void, Bitmap>{
 
 		@Override
-		protected Bitmap doInBackground(RequestParams... params) {
-			BufferedReader reader = null;
-			
+		protected Bitmap doInBackground(RequestParams... params) {			
 			try {
 				HttpsURLConnection con = params[0].setupConnection();
 				return BitmapFactory.decodeStream(con.getInputStream());
