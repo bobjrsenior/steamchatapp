@@ -42,6 +42,7 @@ public class MainActivity extends Activity implements Login{
 	public EditText password;
 	public String loginSettings;
 	public String captcha_id;
+	public String steamguard_id;
 
 	public ProgressDialog progressDialog;
 	
@@ -116,33 +117,64 @@ public class MainActivity extends Activity implements Login{
 			//Captcha
 			if(results.get(1).length() > 2){
 				Log.d("resulting", "Got there");
-				if(findViewById(27015) == null){
-					ImageView captcha_image = new ImageView(MainActivity.this);
-					captcha_image.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 135));
-					captcha_image.setId(27015);
-					captcha_image.setScaleType(ScaleType.FIT_XY);
-					layout.addView(captcha_image);
+				if(!results.get(1).equals("1")){
+					if(findViewById(27015) == null){
+						ImageView captcha_image = new ImageView(MainActivity.this);
+						captcha_image.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 135));
+						captcha_image.setId(27015);
+						captcha_image.setScaleType(ScaleType.FIT_XY);
+						layout.addView(captcha_image);
+					}
+					captcha_id = results.get(1);
+					RequestParams params = new RequestParams("GET", "https://steamcommunity.com/public/captcha.php?gid=" + results.get(1));
+					new GetImage().execute(params);
+					
+					if(findViewById(27016) == null){
+						EditText answer = new EditText(MainActivity.this);
+						answer.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+						answer.setHint("Captcha");
+						layout.addView(answer);
+						answer.setId(27016);
+						Button retry = new Button(MainActivity.this);
+						retry.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+						retry.setText("Check Captcha");
+						layout.addView(retry);
+						
+						retry.setOnClickListener(new OnClickListener() {
+							
+							@Override
+							public void onClick(View v) {
+								new LoginAsyncTask(password.getText().toString(), username.getText().toString(), MainActivity.this).execute(loginSettings, "1", captcha_id, ((EditText) findViewById(27016)).getText().toString());
+								progressDialog.show();
+							}
+						});
+					}
+					else{
+						EditText answer = (EditText) findViewById(27016);
+						answer.setText("");
+						answer.setHint("Captcha");
+					}
 				}
-				captcha_id = results.get(1);
-				RequestParams params = new RequestParams("GET", "https://steamcommunity.com/public/captcha.php?gid=" + results.get(1));
-				new GetImage().execute(params);
-				
+			}
+			else if(!results.get(2).equals("1")){
+				Log.d("demo", "email Auth");
+				steamguard_id = results.get(2);
 				if(findViewById(27016) == null){
 					EditText answer = new EditText(MainActivity.this);
 					answer.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-					answer.setHint("Captcha");
+					answer.setHint("Auth Code From Email");
 					layout.addView(answer);
 					answer.setId(27016);
 					Button retry = new Button(MainActivity.this);
 					retry.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-					retry.setText("Check Captcha");
+					retry.setText("Authorize");
 					layout.addView(retry);
 					
 					retry.setOnClickListener(new OnClickListener() {
 						
 						@Override
 						public void onClick(View v) {
-							new LoginAsyncTask(password.getText().toString(), username.getText().toString(), MainActivity.this).execute(loginSettings, "1", captcha_id, ((EditText) findViewById(27016)).getText().toString());
+							new LoginAsyncTask(password.getText().toString(), username.getText().toString(), MainActivity.this).execute(loginSettings, "2", steamguard_id, ((EditText) findViewById(27016)).getText().toString());
 							progressDialog.show();
 						}
 					});
@@ -150,9 +182,8 @@ public class MainActivity extends Activity implements Login{
 				else{
 					EditText answer = (EditText) findViewById(27016);
 					answer.setText("");
+					answer.setHint("SteamGuard");
 				}
-
-
 			}
 		}
 		

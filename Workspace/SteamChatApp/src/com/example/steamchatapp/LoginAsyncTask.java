@@ -30,6 +30,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.EditText;
 
+
 public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>>{
 
 	
@@ -74,7 +75,7 @@ public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>
 			PublicKey pub = factory.generatePublic(rsa_params);
 			
 			//Create a RSA cipher
-			Cipher cipher = Cipher.getInstance("RSA");
+			Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 			
 			//Set the cipher to encrypt using the public key
 			cipher.init(Cipher.ENCRYPT_MODE, pub);
@@ -105,16 +106,16 @@ public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>
 					Log.d("captcha Stuff", "G: " + params[2] + " : " + params[3]);
 				}
 				else if(params[1].equals("2")){
-					params2.addParam("emailauth", params[2]);
-					params2.addParam("emailsteamid", params[3]);
+					params2.addParam("emailsteamid", params[2]);
+					params2.addParam("emailauth", params[3]);
 					params2.addParam("captchagid", "");
 					params2.addParam("captcha_text", "");
 				}
 				else if(params[1].equals("3")){
 					params2.addParam("captchagid", params[2]);
 					params2.addParam("captcha_text", params[3]);
-					params2.addParam("emailauth", params[4]);
-					params2.addParam("emailsteamid", params[5]);
+					params2.addParam("emailsteamid", params[4]);
+					params2.addParam("emailauth", params[5]);
 				}
 			}
 			
@@ -127,7 +128,7 @@ public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>
 			
 			if(obj.getString("success").equals("false")){
 				results.add("0");
-				if(obj.getString("captcha_needed").equals("true")){
+				if(obj.has("captcha_needed") && obj.getString("captcha_needed").equals("true")){
 					String captcha_gid = obj.getString("captcha_gid");
 					//params2 = new RequestParams("GET", "https://steamcommunity.com/public/captcha.php?gid=" + captcha_gid);
 					//captcha_image = GetBitMap(params2);
@@ -139,9 +140,10 @@ public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>
 					results.add("1");
 				}
 				
-				if(obj.getString("requires_twofactor").equals("true")){
+				if(obj.getString("emailauth_needed").equals("true")){
+					String steamguard_id = obj.getString("emailsteamid");
 					//check[1] = true;
-					results.add("0");
+					results.add(steamguard_id);
 				}
 				else{
 					results.add("1");
