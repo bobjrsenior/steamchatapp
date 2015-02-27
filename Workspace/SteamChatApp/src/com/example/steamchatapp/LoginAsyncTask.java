@@ -148,6 +148,12 @@ public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>
 			}
 			else{
 				results.add("1");
+				JSONObject obj_params = obj.getJSONObject("transfer_parameters");
+				LoginInfo.auth = obj.getString("auth");
+				LoginInfo.steam_id = obj.getString("steamid");
+				LoginInfo.token = obj.getString("token");
+				LoginInfo.token_secure = obj.getString("token_secure");
+				LoginInfo.webcookie = obj.getString("webcookie");
 			}
 			return results;
 		} catch (JSONException e) {
@@ -183,8 +189,6 @@ public class LoginAsyncTask extends AsyncTask<String, Boolean, ArrayList<String>
 		if(values[0]){
 			
 		}
-		
-		
 	}
 	
 	
